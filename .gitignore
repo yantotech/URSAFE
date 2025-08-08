@@ -1,3 +1,18 @@
+# Node modules (frontend)
+node_modules/
+build/
+dist/
+
+# YOLO output folders
+runs/
+weights/
+*.pt
+*.onnx
+
+# Cloud credentials
+*.json
+*.env
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
