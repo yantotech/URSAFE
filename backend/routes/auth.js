@@ -34,14 +34,27 @@ router.post("/register", (req, res) => {
 router.post("/login", (req, res) => {
   const { userName, password } = req.body;
 
-  db.query("SELECT * FROM users WHERE userName = ?", [userName], async (err, results) => {
+  db.query("SELECT * FROM admin_login WHERE adminName = ?", [userName], (err, adminResults) => {
     if (err) return res.status(500).json({ error: err });
 
-    if (results.length === 0) {
+    if (adminResults.length > 0) {
+      const admin = adminResults[0];
+
+      if (password.trim() === admin.passwordAdmin.trim()) {
+        return res.json({ message: "Login successful", role: "admin", user: admin });
+      } else {
+        return res.status(400).json({ error: "Invalid password" });
+      }
+    }
+
+  db.query("SELECT * FROM users WHERE userName = ?", [userName], async (err, userResults) => {
+    if (err) return res.status(500).json({ error: err });
+
+    if (userResults.length === 0) {
       return res.status(400).json({ error: "User not found" });
     }
 
-    const user = results[0];
+    const user = userResults[0];
 
     // Cek password
     const isMatch = await bcrypt.compare(password, user.passwordUser);
@@ -49,8 +62,9 @@ router.post("/login", (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
     }
 
-    res.json({ message: "Login successful", user });
+    res.json({ message: "Login successful", role: "user", user });
   });
+});
 });
 
 module.exports = router;

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah Kejadian - Crime Monitoring{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-header">
+            <h2>🚨 Tambah Kejadian Baru</h2>
+            <p>Laporkan kejadian yang terjadi dengan memilih lokasi di peta</p>
+        </div>
+
+        <form id="incidentForm" class="form">
+            <div class="form-group">
+                <label for="criteria" class="form-label">
+                    <span class="label-text">Jenis Kejadian</span>
+                    <span class="label-required">*</span>
+                </label>
+                <select id="criteria" name="criteria" class="form-input" required>
+                    <option value="">Pilih jenis kejadian</option>
+                    <option value="kecelakaan">🚗 Kecelakaan Lalu Lintas</option>
+                    <option value="perkelahian">👊 Perkelahian</option>
+                    <option value="ledakan">💥 Ledakan</option>
+                    <option value="penyerangan">⚔️ Penyerangan</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="form-label">
+                    <span class="label-text">Lokasi Kejadian</span>
+                    <span class="label-required">*</span>
+                </label>
+                <input type="text" id="location" name="location" class="form-input"
+                    placeholder="Klik pada peta untuk memilih lokasi" readonly required>
+                <div class="form-help">
+                    📍 Klik pada peta di sebelah kanan untuk menentukan lokasi kejadian
+                </div>
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    <span class="label-text">Deskripsi (Opsional)</span>
+                </label>
+                <textarea id="description" name="description" class="form-input form-textarea"
+                    placeholder="Tambahkan detail kejadian jika diperlukan" rows="4"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="clearIncidentForm()" class="btn btn-outline">
+                    🔄 Reset Form
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    💾 Simpan Kejadian
+                </button>
+            </div>
+        </form>
+
+        <div id="formStatus" class="form-status"></div>
+    </div>
+
+    <div class="map-container">
+        <div class="map-header">
+            <h3>📍 Pilih Lokasi Kejadian</h3>
+            <p>Klik pada peta untuk menentukan koordinat lokasi kejadian</p>
+        </div>
+        <div id="map"></div>
+        <div class="map-info">
+            <p><strong>Koordinat:</strong> <span id="coordinates">Belum dipilih</span></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Form submission handler
+    document.getElementById('incidentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = {
+            criteria: document.getElementById('criteria').value,
+            location_name: document.getElementById('location').value,
+            latitude: document.getElementById('latitude').value,
+            longitude: document.getElementById('longitude').value,
+            description: document.getElementById('description').value
+        };
+
+        // Validation
+        if (!formData.criteria || !formData.latitude || !formData.longitude) {
+            showFormStatus('⚠️ Mohon lengkapi jenis kejadian dan pilih lokasi pada peta', 'error');
+            return;
+        }
+
+        try {
+            showFormStatus('⏳ Menyimpan kejadian...', 'loading');
+
+            const response = await fetch('/api/incidents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showFormStatus('✅ Kejadian berhasil ditambahkan!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                showFormStatus(`❌ ${result.error}`, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showFormStatus('❌ Terjadi kesalahan saat menyimpan data', 'error');
+        }
+    });
+
+    function clearIncidentForm() {
+        document.getElementById('incidentForm').reset();
+        document.getElementById('coordinates').textContent = 'Belum dipilih';
+        if (window.currentMarker && window.map) {
+            window.map.removeLayer(window.currentMarker);
+            window.currentMarker = null;
+        }
+        showFormStatus('', '');
+    }
+
+    function showFormStatus(message, type) {
+        const statusEl = document.getElementById('formStatus');
+        statusEl.textContent = message;
+        statusEl.className = `form-status ${type}`;
+    }
+
+    // Update coordinates display
+    function updateCoordinatesDisplay(lat, lng) {
+        document.getElementById('coordinates').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+</script>
+{% endblock %}

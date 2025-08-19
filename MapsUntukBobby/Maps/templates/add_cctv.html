@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Tambah CCTV - Crime Monitoring{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-container">
+        <div class="form-header">
+            <h2>📹 Tambah CCTV Baru</h2>
+            <p>Daftarkan lokasi CCTV untuk monitoring keamanan</p>
+        </div>
+
+        <form id="cctvForm" class="form">
+            <div class="form-group">
+                <label for="cctvName" class="form-label">
+                    <span class="label-text">Nama CCTV</span>
+                    <span class="label-required">*</span>
+                </label>
+                <input type="text" id="cctvName" name="cctvName" class="form-input"
+                    placeholder="Contoh: CCTV Bundaran HI - 01" required>
+                <div class="form-help">
+                    💡 Berikan nama yang mudah diidentifikasi untuk CCTV ini
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="cctvLocation" class="form-label">
+                    <span class="label-text">Lokasi CCTV</span>
+                    <span class="label-required">*</span>
+                </label>
+                <input type="text" id="cctvLocation" name="cctvLocation" class="form-input"
+                    placeholder="Klik pada peta untuk memilih lokasi" readonly required>
+                <div class="form-help">
+                    📍 Klik pada peta di sebelah kanan untuk menentukan lokasi CCTV
+                </div>
+                <input type="hidden" id="cctvLatitude" name="cctvLatitude">
+                <input type="hidden" id="cctvLongitude" name="cctvLongitude">
+            </div>
+
+            <div class="form-group">
+                <label for="cctvStatus" class="form-label">
+                    <span class="label-text">Status CCTV</span>
+                </label>
+                <select id="cctvStatus" name="cctvStatus" class="form-input">
+                    <option value="active">✅ Aktif</option>
+                    <option value="maintenance">🔧 Maintenance</option>
+                    <option value="inactive">❌ Tidak Aktif</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cctvDescription" class="form-label">
+                    <span class="label-text">Deskripsi (Opsional)</span>
+                </label>
+                <textarea id="cctvDescription" name="cctvDescription" class="form-input form-textarea"
+                    placeholder="Tambahkan informasi tambahan tentang CCTV ini" rows="4"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="clearCCTVForm()" class="btn btn-outline">
+                    🔄 Reset Form
+                </button>
+                <button type="submit" class="btn btn-secondary">
+                    📹 Simpan CCTV
+                </button>
+            </div>
+        </form>
+
+        <div id="formStatus" class="form-status"></div>
+    </div>
+
+    <div class="map-container">
+        <div class="map-header">
+            <h3>📍 Pilih Lokasi CCTV</h3>
+            <p>Klik pada peta untuk menentukan koordinat lokasi CCTV</p>
+            <small>CCTV yang sudah ada akan ditampilkan dengan marker biru</small>
+        </div>
+        <div id="map"></div>
+        <div class="map-info">
+            <p><strong>Koordinat:</strong> <span id="coordinates">Belum dipilih</span></p>
+            <p><strong>CCTV Terdaftar:</strong> <span id="cctvCount">Loading...</span></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Load existing CCTV count
+    async function loadCCTVCount() {
+        try {
+            const response = await fetch('/api/cctvs');
+            const cctvs = await response.json();
+            document.getElementById('cctvCount').textContent = cctvs.length;
+        } catch (error) {
+            document.getElementById('cctvCount').textContent = 'Error';
+        }
+    }
+
+    // Form submission handler
+    document.getElementById('cctvForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = {
+            name: document.getElementById('cctvName').value.trim(),
+            location_name: document.getElementById('cctvLocation').value,
+            latitude: document.getElementById('cctvLatitude').value,
+            longitude: document.getElementById('cctvLongitude').value,
+            status: document.getElementById('cctvStatus').value,
+            description: document.getElementById('cctvDescription').value
+        };
+
+        // Validation
+        if (!formData.name || !formData.latitude || !formData.longitude) {
+            showFormStatus('⚠️ Mohon lengkapi nama CCTV dan pilih lokasi pada peta', 'error');
+            return;
+        }
+
+        try {
+            showFormStatus('⏳ Menyimpan CCTV...', 'loading');
+
+            const response = await fetch('/api/cctvs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showFormStatus('✅ CCTV berhasil ditambahkan!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                showFormStatus(`❌ ${result.error}`, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showFormStatus('❌ Terjadi kesalahan saat menyimpan data', 'error');
+        }
+    });
+
+    function clearCCTVForm() {
+        document.getElementById('cctvForm').reset();
+        document.getElementById('cctvStatus').value = 'active';
+        document.getElementById('coordinates').textContent = 'Belum dipilih';
+        if (window.currentMarker && window.map) {
+            window.map.removeLayer(window.currentMarker);
+            window.currentMarker = null;
+        }
+        showFormStatus('', '');
+    }
+
+    function showFormStatus(message, type) {
+        const statusEl = document.getElementById('formStatus');
+        statusEl.textContent = message;
+        statusEl.className = `form-status ${type}`;
+    }
+
+    // Update coordinates display
+    function updateCoordinatesDisplay(lat, lng) {
+        document.getElementById('coordinates').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+        loadCCTVCount();
+    });
+</script>
+{% endblock %}
