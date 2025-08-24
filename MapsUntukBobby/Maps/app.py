@@ -285,6 +285,11 @@ def map_page():
     """Halaman khusus untuk Map"""
     return render_template('map.html')
 
+@app.route('/cctv')
+def cctv_page():
+    """Halaman khusus untuk CCTV"""
+    return render_template('cctv.html')
+
 @app.route('/api/reports')
 def api_reports():
     try:

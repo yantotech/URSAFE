@@ -33,35 +33,35 @@ const Home = () => {
 
   // Dummy data kejadian (April - September)
   const dummyData = {
-    labels: ["April", "Mei", "Juni", "Juli", "Agustus", "September"],
+    labels: ["Juli", "Agustus", "September"],
     datasets: [
       {
         label: "Kecelakaan",
-        data: [12, 19, 3, 5, 2, 8],
+        data: [5, 2, 8],
         borderColor: "rgba(255, 99, 132, 1)",
         backgroundColor: "rgba(255, 99, 132, 0.2)",
       },
       {
         label: "Kebakaran",
-        data: [5, 15, 8, 2, 10, 6],
+        data: [2, 10, 6],
         borderColor: "rgba(255, 159, 64, 1)",
         backgroundColor: "rgba(255, 159, 64, 0.2)",
       },
       {
         label: "Kriminalitas",
-        data: [9, 12, 15, 8, 5, 3],
+        data: [8, 5, 3],
         borderColor: "rgba(54, 162, 235, 1)",
         backgroundColor: "rgba(54, 162, 235, 0.2)",
       },
       {
         label: "Kerusakan Infrastruktur",
-        data: [7, 4, 10, 15, 6, 9],
+        data: [7, 6, 9],
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
       },
       {
         label: "Kerusuhan",
-        data: [3, 8, 6, 4, 9, 12],
+        data: [4, 9, 12],
         borderColor: "rgba(153, 102, 255, 1)",
         backgroundColor: "rgba(153, 102, 255, 0.2)",
       },
@@ -157,3 +157,4 @@ const Home = () => {
 };
 
 export default Home;
+

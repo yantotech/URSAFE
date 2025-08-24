@@ -13,22 +13,15 @@ const ProfileUser = () => {
     phoneNumber: "",
   });
 
-  // ===== SLOT ambil data user dari backend =====
-  useEffect(() => {
-    // Contoh integrasi nanti:
-    // fetch(`/api/users/${userId}`)
-    //   .then(res => res.json())
-    //   .then(data => setFormData(data))
-    //   .catch(err => console.error(err));
+  const userId = localStorage.getItem("userId");
 
-    // Dummy data untuk tampilan awal
-    setFormData({
-      fullName: "Budiman",
-      userName: "abcdefg",
-      address: "Lokasi A",
-      email: "abc@gmail.com",
-      phoneNumber: "08XXXXXXXXXX",
-    });
+  useEffect(() => {
+    if (!userId) return;
+
+    fetch(`http://localhost:3001/api/profile/${userId}`)
+      .then(res => res.json())
+      .then(data => setFormData(data))
+      .catch(err => console.error(err));
   }, []);
 
   const handleChange = (field, value) => {
@@ -36,15 +29,14 @@ const ProfileUser = () => {
   };
 
   const handleSave = () => {
-    // ===== SLOT untuk update profil ke backend =====
-    // fetch(`/api/users/${userId}`, {
-    //   method: "PUT",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(formData),
-    // })
-    //   .then(res => res.json())
-    //   .then(data => alert("Profil berhasil diperbarui!"))
-    //   .catch(err => console.error(err));
+    fetch(`http://localhost:3001/api/profile/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+      .then(res => res.json())
+      .then(data => alert("Profil berhasil diperbarui!"))
+      .catch(err => console.error(err));
 
     console.log("Data disimpan:", formData);
   };

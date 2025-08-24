@@ -311,7 +311,7 @@ async function loadCCTVMarkers() {
     try {
         console.log('📹 Loading CCTV markers...');
 
-        const response = await fetch('/api/cctvs');
+        const response = await fetch('http://localhost:3001/api/cctv');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }

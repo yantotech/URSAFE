@@ -22,10 +22,17 @@ export const Login = () => {
       const data = await res.json();
       if (res.ok) {
         alert("Login successful!");
-        if (data.role === "admin") {
+
+        localStorage.setItem("role", data.role);
+
+        if (data.role === "user" && data.user?.id) {
+          localStorage.setItem("userId", data.user.id);
+          navigate("/home");
+        } else if (data.role === "admin" && data.user?.id) {
+          localStorage.setItem("adminId", data.user.id);
           navigate("/admin");
         } else {
-          navigate("/home");
+          alert("Login berhasil, tapi role tidak dikenali");
         }
       } else {
         alert(data.message || "Login failed");

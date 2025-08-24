@@ -40,20 +40,18 @@ export const ReportUser = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ✅ DITAMBAH: Geocoding alamat → koordinat
+  // Geocoding
   const getCoordinatesFromAddress = async (address) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          address
-        )}`
+        `http://localhost:3001/api/geocode/search?q=${encodeURIComponent(address)}`
       );
       const data = await res.json();
       if (data.length > 0) {
         setFormData((prev) => ({
           ...prev,
-          latitude: parseFloat(data[0].lat), // ⬅️ simpan angka
-          longitude: parseFloat(data[0].lon), // ⬅️ simpan angka
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon),
         }));
         return true;
       }
@@ -64,11 +62,11 @@ export const ReportUser = () => {
     }
   };
 
-  // ✅ DITAMBAH: Reverse geocoding koordinat → alamat
+  // Reverse Geocoding
   const getAddressFromCoordinates = async (lat, lon) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+        `http://localhost:3001/api/geocode/reverse?lat=${lat}&lon=${lon}`
       );
       const data = await res.json();
       if (data && data.display_name) {
@@ -82,13 +80,10 @@ export const ReportUser = () => {
     }
   };
 
-  // ✅ DIUBAH: handleSubmit → cek alamat manual dan isi koordinat
-// ✅ DIUBAH: handleSubmit → pastikan koordinat selalu ada
 const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!useMap && formData.lokasiKejadian) {
-    // kalau manual → geocode untuk ambil lat/lon
     const ok = await getCoordinatesFromAddress(formData.lokasiKejadian);
     if (!ok) {
       alert("Alamat tidak ditemukan. Coba perjelas alamat atau pilih dari map.");
@@ -102,10 +97,16 @@ const handleSubmit = async (e) => {
   setShowPopup(true);
 };
 
-// ✅ DIUBAH: handleFinish → debug dulu biar kelihatan
 const handleFinish = async () => {
   try {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("Anda harus login dulu sebelum membuat laporan.");
+      return;
+    }
+
     const payload = {
+      userId,
       jenisKejadian: formData.jenisKejadian,
       lokasiKejadian: formData.lokasiKejadian,
       latitude:
@@ -116,7 +117,7 @@ const handleFinish = async () => {
       deskripsiKejadian: formData.deskripsiKejadian,
     };
 
-    console.log("📌 Payload yang dikirim:", payload); // ⬅️ cek sebelum dikirim
+    console.log("Payload:", payload);
 
     const res = await fetch("http://localhost:3001/api/report", {
       method: "POST",
@@ -146,7 +147,6 @@ const handleFinish = async () => {
   }
 };
 
-  // ✅ DIUBAH: klik map isi lat/lon + reverse geocode alamat
   const LocationMarker = () => {
     useMapEvents({
       click(e) {

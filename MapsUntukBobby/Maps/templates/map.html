@@ -34,7 +34,7 @@
     }).addTo(map);
 
     // Ambil data lokasi dari API
-    fetch("api/reports")
+    fetch("http://localhost:3001/api/report/verified")
       .then(res => res.json())
       .then(data => {
         const markers = [];
@@ -51,10 +51,10 @@ data.forEach(r => {
     const marker = L.marker([r.latitude, r.longitude], {icon: redIcon})
       .addTo(map)
       .bindPopup(`
-        <b>${r.jenisKejadian || "Tanpa Jenis"}</b><br>
-        Lokasi: ${r.lokasiKejadian || "-"}<br>
-        Deskripsi: ${r.deskripsiKejadian || "-"}<br>
-        Waktu: ${r.waktuKejadian || "-"}
+        <b>${r.jenis || "Tanpa Jenis"}</b><br>
+        Lokasi: ${r.lokasi || "-"}<br>
+        Deskripsi: ${r.deskripsi || "-"}<br>
+        Waktu: ${r.waktu|| "-"}
       `);
         markers.push(marker);
     }

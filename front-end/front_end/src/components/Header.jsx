@@ -17,7 +17,7 @@ export default function Header() {
         <button
             onClick={() => navigate("/home")}
             className={`text-lg font-medium transition-colors duration-200 ${
-            window.location.pathname === "/home"
+            window.location.pathname === "/home" || window.location.pathname.startsWith("/detail")
                 ? "text-blue-400"
                 : "text-gray-200 hover:text-white"
             }`}
