@@ -1,0 +1,9 @@
+[33m267673b5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m push4
+[33maa56d99c[m push 3
+[33mccf5e655[m push 3
+[33m41d5dbb0[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m push 2
+[33mcac90930[m Add front_end folder as normal directory
+[33me5ceaa4f[m Merge branch 'main' of https://github.com/yantotech/URSAFE
+[33mb8690432[m[33m ([m[1;31morigin/master[m[33m)[m ini untuk front-end, back-end, database
+[33ma15da232[m .gitignore
+[33m82d63b62[m Initial commit
